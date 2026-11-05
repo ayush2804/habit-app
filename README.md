@@ -4,8 +4,11 @@ A focused native Android habit tracker for **Ayush Pandey**. Built with **Kotlin
 
 ## Features
 
+- Colorful atmospheric UI (lagoon / coral / sun) with tinted habit rows
+- **18 world-class templates** across Energy, Body, Mind, Focus, Nourish, Home, Growth
+- 12-color habit palette with soft companion tones
 - Habit list with today’s progress and streak badges
-- Add habit with color, weekday schedule, and optional reminder
+- Add habit from a template or custom: color, weekday schedule, reminder
 - Check-in: **Completed** (how you feel) or **Missed** (reason & improvement)
 - Undo today’s check-in
 - Habit detail: week strip, streaks, schedule, reflection history, edit / archive / delete
