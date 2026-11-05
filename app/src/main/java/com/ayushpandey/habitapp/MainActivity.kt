@@ -7,9 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.ayushpandey.habitapp.ui.HabitListScreen
-import com.ayushpandey.habitapp.ui.HabitViewModel
+import com.ayushpandey.habitapp.ui.HabitNav
 import com.ayushpandey.habitapp.ui.theme.HabitAppTheme
 
 class MainActivity : ComponentActivity() {
@@ -20,10 +18,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             HabitAppTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    val viewModel: HabitViewModel = viewModel(
-                        factory = HabitViewModel.factory(app.repository)
-                    )
-                    HabitListScreen(viewModel = viewModel)
+                    HabitNav(app = app)
                 }
             }
         }
