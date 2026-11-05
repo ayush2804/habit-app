@@ -1,51 +1,47 @@
 # Habit App
 
-A simple native Android habit tracker for **Ayush Pandey**. Built with **Kotlin**, **Jetpack Compose**, and **Room**.
+A focused native Android habit tracker for **Ayush Pandey**. Built with **Kotlin**, **Jetpack Compose**, and **Room**.
 
 ## Features
 
-- Interactive habit list on launch
-- Add a new habit (dialog → appears in the list)
-- Tap a habit to check in:
-  - **Completed** → reflection: *How do you feel?*
-  - **Missed** → reflection: *What got in the way, and what could you try next time?*
-- Habits and reflection notes persist locally with Room
+- Colorful atmospheric UI (lagoon / coral / sun) with tinted habit rows
+- **18 world-class templates** across Energy, Body, Mind, Focus, Nourish, Home, Growth
+- 12-color habit palette with soft companion tones
+- Habit list with today’s progress and streak badges
+- Add habit from a template or custom: color, weekday schedule, reminder
+- Check-in: **Completed** (how you feel) or **Missed** (reason & improvement)
+- Undo today’s check-in
+- Habit detail: week strip, streaks, schedule, reflection history, edit / archive / delete
+- Insights: today completion, 7-day rate, longest streak
+- Local reminders (AlarmManager) that survive reboot
+- Offline persistence with Room (v2 schema + migration)
 
 ## Open & run in Android Studio
 
-1. Install [Android Studio](https://developer.android.com/studio) (Hedgehog or newer recommended) with an Android SDK (API 35) and a device/emulator (API 26+).
-2. **File → Open** and select this repository root (the folder that contains `settings.gradle.kts`).
-3. Let Gradle sync finish (Android Studio downloads the wrapper/distribution if needed).
-4. Pick an emulator or a USB-connected device.
-5. Click **Run** (green play) on the `app` configuration.
+1. Install [Android Studio](https://developer.android.com/studio) with Android SDK API 35.
+2. **File → New → Project from Version Control** and clone  
+   `https://github.com/ayush2804/habit-app.git`  
+   (or **File → Open** the folder that contains `settings.gradle.kts`).
+3. Wait for Gradle sync.
+4. Start an emulator (API 26+) or connect a device.
+5. Run the `app` configuration.
 
-### Command line (optional)
+### Command line
 
 ```bash
 ./gradlew :app:assembleDebug
 ./gradlew :app:installDebug
 ```
 
-Requires `JAVA_HOME` (JDK 17+) and Android SDK (`ANDROID_HOME` / `local.properties` with `sdk.dir=...`).
+Requires JDK 17+ and Android SDK (`local.properties` with `sdk.dir=...`).
 
 ## UX flows
 
-1. **First launch** — empty list with a short hint; FAB **+** to add.
-2. **Add habit** — name dialog → **Save** inserts the habit at the top of the list.
-3. **Check in** — tap a habit → choose **Completed** or **Missed**.
-4. **Reflect** — modal text field with save/cancel; note is stored with the outcome on the habit.
-5. **Return later** — list and last outcomes reload from the local database.
-
-## Project layout
-
-```
-app/src/main/java/com/ayushpandey/habitapp/
-  MainActivity.kt
-  HabitApplication.kt
-  data/          # Room entities, DAO, database, repository
-  ui/            # ViewModel + Compose habit list / dialogs
-  ui/theme/      # Material 3 theme
-```
+1. **Home** — list + progress for habits due today; FAB to add; Insights in the app bar.
+2. **Add** — name, color, days, optional reminder → Save.
+3. **Check in** — tap the circle → Completed / Missed → reflection note → Save.
+4. **Detail** — tap the habit title row → streaks, week view, history, edit/archive/delete.
+5. **Insights** — quiet consistency summary (not a noisy dashboard).
 
 ## Requirements
 
