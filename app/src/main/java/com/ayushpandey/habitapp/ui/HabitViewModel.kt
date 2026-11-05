@@ -6,13 +6,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.ayushpandey.habitapp.HabitApplication
+import com.ayushpandey.habitapp.data.HabitColors
 import com.ayushpandey.habitapp.data.HabitEntity
 import com.ayushpandey.habitapp.data.HabitOutcome
 import com.ayushpandey.habitapp.data.HabitRepository
 import com.ayushpandey.habitapp.data.HabitStats
+import com.ayushpandey.habitapp.data.HabitTemplate
 import com.ayushpandey.habitapp.data.HabitWithToday
 import com.ayushpandey.habitapp.data.ScheduleDays
 import com.ayushpandey.habitapp.data.StreakCalculator
+import com.ayushpandey.habitapp.data.TemplateCategory
 import com.ayushpandey.habitapp.reminders.ReminderScheduler
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -23,10 +26,14 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
+enum class AddStep { TEMPLATES, CUSTOMIZE }
+
 data class HomeUiState(
     val showAddDialog: Boolean = false,
+    val addStep: AddStep = AddStep.TEMPLATES,
+    val templateCategory: TemplateCategory? = null,
     val addTitle: String = "",
-    val addColor: Int = com.ayushpandey.habitapp.data.HabitColors.options.first(),
+    val addColor: Int = HabitColors.Lagoon.argb,
     val addSchedule: Int = ScheduleDays.ALL,
     val addReminderEnabled: Boolean = false,
     val addReminderHour: Int = 9,
@@ -68,13 +75,34 @@ class HabitViewModel(
         _ui.update {
             HomeUiState(
                 showAddDialog = true,
-                addColor = com.ayushpandey.habitapp.data.HabitColors.options.random()
+                addStep = AddStep.TEMPLATES,
+                addColor = HabitColors.options.random()
             )
         }
     }
 
     fun dismissAddDialog() {
         _ui.update { HomeUiState() }
+    }
+
+    fun onTemplateCategory(category: TemplateCategory?) =
+        _ui.update { it.copy(templateCategory = category) }
+
+    fun goCustomize() = _ui.update { it.copy(addStep = AddStep.CUSTOMIZE) }
+
+    fun applyTemplate(template: HabitTemplate) {
+        _ui.update {
+            it.copy(
+                addStep = AddStep.CUSTOMIZE,
+                addTitle = template.title,
+                addColor = template.colorArgb,
+                addSchedule = template.scheduleDays,
+                addReminderEnabled = template.reminderHour != null,
+                addReminderHour = template.reminderHour ?: 9,
+                addReminderMinute = template.reminderMinute,
+                addError = null
+            )
+        }
     }
 
     fun onAddTitleChange(value: String) = _ui.update { it.copy(addTitle = value, addError = null) }

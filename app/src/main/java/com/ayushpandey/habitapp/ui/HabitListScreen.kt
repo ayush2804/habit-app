@@ -22,6 +22,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -33,7 +34,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -52,13 +52,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ayushpandey.habitapp.data.HabitColors
-import com.ayushpandey.habitapp.data.HabitEntity
 import com.ayushpandey.habitapp.data.HabitOutcome
+import com.ayushpandey.habitapp.data.HabitTemplate
 import com.ayushpandey.habitapp.data.HabitWithToday
+import com.ayushpandey.habitapp.data.TemplateCategory
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -106,20 +109,20 @@ fun HabitListScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background
+                    containerColor = Color.Transparent
                 )
             )
         },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = viewModel::openAddDialog,
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
+                containerColor = MaterialTheme.colorScheme.secondary,
+                contentColor = MaterialTheme.colorScheme.onSecondary
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Add habit")
             }
         },
-        containerColor = MaterialTheme.colorScheme.background
+        containerColor = Color.Transparent
     ) { padding ->
         Column(
             modifier = Modifier
@@ -132,12 +135,12 @@ fun HabitListScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 20.dp)
-                        .height(4.dp)
+                        .height(6.dp)
                         .clip(CircleShape),
-                    color = MaterialTheme.colorScheme.primary,
-                    trackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f)
+                    color = MaterialTheme.colorScheme.secondary,
+                    trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
                 )
-                Spacer(Modifier.height(4.dp))
+                Spacer(Modifier.height(8.dp))
             }
 
             Box(modifier = Modifier.weight(1f)) {
@@ -145,8 +148,8 @@ fun HabitListScreen(
                     EmptyHabitsHint(Modifier.fillMaxSize().padding(32.dp))
                 } else {
                     LazyColumn(
-                        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
-                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
                         modifier = Modifier.fillMaxSize()
                     ) {
                         items(habits, key = { it.habit.id }) { item ->
@@ -156,9 +159,6 @@ fun HabitListScreen(
                                 onCheckIn = { viewModel.onHabitCheckIn(item.habit) },
                                 onOpen = { onOpenDetail(item.habit.id) },
                                 onUndo = { viewModel.undoToday(item.habit) }
-                            )
-                            HorizontalDivider(
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f)
                             )
                         }
                         item { Spacer(Modifier.height(88.dp)) }
@@ -171,6 +171,9 @@ fun HabitListScreen(
     if (ui.showAddDialog) {
         AddHabitDialog(
             state = ui,
+            onCategoryChange = viewModel::onTemplateCategory,
+            onPickTemplate = viewModel::applyTemplate,
+            onCustom = viewModel::goCustomize,
             onTitleChange = viewModel::onAddTitleChange,
             onColorChange = viewModel::onAddColorChange,
             onScheduleToggle = viewModel::onAddScheduleToggle,
@@ -215,10 +218,16 @@ private fun EmptyHabitsHint(modifier: Modifier = Modifier) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.Start
     ) {
-        Text("No habits yet", style = MaterialTheme.typography.headlineLarge)
+        Text("Habit App", style = MaterialTheme.typography.headlineLarge)
+        Spacer(Modifier.height(8.dp))
+        Text(
+            "No habits yet",
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.primary
+        )
         Spacer(Modifier.height(12.dp))
         Text(
-            "Add a habit, set the days it matters, and optionally a reminder. Each check-in captures how it went — that’s how streaks grow.",
+            "Tap + to browse colorful templates — energy, mind, body, focus — or craft your own.",
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.75f)
         )
@@ -236,23 +245,29 @@ private fun HabitRow(
     val habit = item.habit
     val today = item.todayCheckIn
     val accent = HabitColors.asCompose(habit.colorArgb)
+    val soft = HabitColors.softFor(habit.colorArgb)
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 14.dp),
+            .clip(RoundedCornerShape(20.dp))
+            .background(
+                Brush.horizontalGradient(listOf(soft, Color.White.copy(alpha = 0.9f), soft.copy(alpha = 0.55f)))
+            )
+            .clickable(onClick = onOpen)
+            .padding(horizontal = 14.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(14.dp)
     ) {
         Box(
             modifier = Modifier
-                .size(44.dp)
+                .size(48.dp)
                 .clip(CircleShape)
                 .background(
                     when (today?.outcome) {
                         HabitOutcome.COMPLETED -> accent
                         HabitOutcome.FAILED -> MaterialTheme.colorScheme.error
-                        null -> accent.copy(alpha = 0.18f)
+                        null -> accent
                     }
                 )
                 .clickable(onClick = onCheckIn),
@@ -262,27 +277,23 @@ private fun HabitRow(
                 HabitOutcome.COMPLETED -> Icon(
                     Icons.Default.Check,
                     contentDescription = "Completed",
-                    tint = MaterialTheme.colorScheme.onPrimary
+                    tint = Color.White
                 )
                 HabitOutcome.FAILED -> Icon(
                     Icons.Default.Close,
                     contentDescription = "Missed",
-                    tint = MaterialTheme.colorScheme.onPrimary
+                    tint = Color.White
                 )
                 null -> Box(
                     Modifier
-                        .size(14.dp)
+                        .size(16.dp)
                         .clip(CircleShape)
-                        .background(accent)
+                        .background(Color.White.copy(alpha = 0.85f))
                 )
             }
         }
 
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .clickable(onClick = onOpen)
-        ) {
+        Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = habit.title,
                 style = MaterialTheme.typography.titleLarge,
@@ -301,14 +312,14 @@ private fun HabitRow(
                     Text(
                         "${habit.currentStreak} day streak",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                        color = accent.copy(alpha = 0.9f)
                     )
                 } else {
                     Text(
                         when {
                             !dueToday -> "Not scheduled today"
                             today == null -> "Tap the circle to check in"
-                            else -> "Tap for details"
+                            else -> "Open details"
                         },
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f)
@@ -326,6 +337,9 @@ private fun HabitRow(
 @Composable
 private fun AddHabitDialog(
     state: HomeUiState,
+    onCategoryChange: (TemplateCategory?) -> Unit,
+    onPickTemplate: (HabitTemplate) -> Unit,
+    onCustom: () -> Unit,
     onTitleChange: (String) -> Unit,
     onColorChange: (Int) -> Unit,
     onScheduleToggle: (Int) -> Unit,
@@ -334,51 +348,73 @@ private fun AddHabitDialog(
     onDismiss: () -> Unit,
     onSave: () -> Unit
 ) {
+    val accent = HabitColors.asCompose(state.addColor)
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("New habit") },
-        text = {
-            Column(
-                modifier = Modifier.verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                OutlinedTextField(
-                    value = state.addTitle,
-                    onValueChange = onTitleChange,
-                    label = { Text("Habit name") },
-                    singleLine = true,
-                    isError = state.addError != null,
-                    supportingText = state.addError?.let { { Text(it) } },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Text("Color", style = MaterialTheme.typography.labelLarge)
-                ColorPicker(selected = state.addColor, onSelect = onColorChange)
-                Text("Days", style = MaterialTheme.typography.labelLarge)
-                ScheduleDayPicker(
-                    scheduleDays = state.addSchedule,
-                    onToggle = onScheduleToggle
-                )
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Daily reminder")
-                    Switch(
-                        checked = state.addReminderEnabled,
-                        onCheckedChange = onReminderEnabled
-                    )
+        title = {
+            Text(
+                when (state.addStep) {
+                    AddStep.TEMPLATES -> "Add a habit"
+                    AddStep.CUSTOMIZE -> "Customize"
                 }
-                if (state.addReminderEnabled) {
-                    ReminderTimeRow(
-                        hour = state.addReminderHour,
-                        minute = state.addReminderMinute,
-                        onChange = onReminderTime
+            )
+        },
+        text = {
+            when (state.addStep) {
+                AddStep.TEMPLATES -> TemplateBrowser(
+                    selectedCategory = state.templateCategory,
+                    onCategoryChange = onCategoryChange,
+                    onPick = onPickTemplate,
+                    onCustom = onCustom
+                )
+                AddStep.CUSTOMIZE -> Column(
+                    modifier = Modifier.verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    OutlinedTextField(
+                        value = state.addTitle,
+                        onValueChange = onTitleChange,
+                        label = { Text("Habit name") },
+                        singleLine = true,
+                        isError = state.addError != null,
+                        supportingText = state.addError?.let { { Text(it) } },
+                        modifier = Modifier.fillMaxWidth()
                     )
+                    Text("Color", style = MaterialTheme.typography.labelLarge, color = accent)
+                    ColorPicker(selected = state.addColor, onSelect = onColorChange)
+                    Text("Days", style = MaterialTheme.typography.labelLarge)
+                    ScheduleDayPicker(
+                        scheduleDays = state.addSchedule,
+                        onToggle = onScheduleToggle,
+                        accent = accent
+                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Daily reminder")
+                        Switch(
+                            checked = state.addReminderEnabled,
+                            onCheckedChange = onReminderEnabled
+                        )
+                    }
+                    if (state.addReminderEnabled) {
+                        ReminderTimeRow(
+                            hour = state.addReminderHour,
+                            minute = state.addReminderMinute,
+                            onChange = onReminderTime
+                        )
+                    }
                 }
             }
         },
-        confirmButton = { Button(onClick = onSave) { Text("Save") } },
+        confirmButton = {
+            when (state.addStep) {
+                AddStep.TEMPLATES -> {}
+                AddStep.CUSTOMIZE -> Button(onClick = onSave) { Text("Save") }
+            }
+        },
         dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } }
     )
 }

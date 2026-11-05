@@ -1,6 +1,5 @@
 package com.ayushpandey.habitapp.data
 
-import androidx.compose.ui.graphics.Color
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
@@ -31,25 +30,12 @@ object ScheduleDays {
     }
 }
 
-object HabitColors {
-    val options = listOf(
-        0xFF1B4D3E.toInt(),
-        0xFF2F6F7E.toInt(),
-        0xFFC45C4A.toInt(),
-        0xFF8B6914.toInt(),
-        0xFF4A5C8B.toInt(),
-        0xFF6B4F7A.toInt()
-    )
-
-    fun asCompose(colorArgb: Int): Color = Color(colorArgb)
-}
-
 @Entity(tableName = "habits")
 data class HabitEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val title: String,
     val createdAtEpochMs: Long = System.currentTimeMillis(),
-    val colorArgb: Int = HabitColors.options.first(),
+    val colorArgb: Int = HabitColors.Lagoon.argb,
     /** Which weekdays this habit is due (Monday=bit0). */
     val scheduleDays: Int = ScheduleDays.ALL,
     val reminderEnabled: Boolean = false,
